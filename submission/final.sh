@@ -101,8 +101,8 @@ NEW_BALANCE=$(bitcoin-cli -regtest -rpcwallet="btrustwallet" getbalance)
 check_cmd "New balance check"
 echo "Your treasure balance: $NEW_BALANCE BTC"
 
-COLLECTED=$(python3 -c 'from decimal import Decimal; import os; print(Decimal(os.environ["NEW_BALANCE"]) - Decimal(os.environ["BALANCE"]))' \
-  BALANCE="$BALANCE" NEW_BALANCE="$NEW_BALANCE")
+COLLECTED=$(BALANCE="$BALANCE" NEW_BALANCE="$NEW_BALANCE" \
+  python3 -c 'from decimal import Decimal; import os; print(Decimal(os.environ["NEW_BALANCE"]) - Decimal(os.environ["BALANCE"]))')
 check_cmd "Balance calculation"
 echo "You've collected $COLLECTED BTC in treasures!"
 
