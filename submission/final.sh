@@ -177,7 +177,7 @@ check_cmd "Getting address info"
 
 # STUDENT TASK: Extract the internal key (the x-only pubkey) from the descriptor
 # WRITE YOUR SOLUTION BELOW:
-INTERNAL_KEY=$(echo "$ADDR_INFO" | python3 -c 'import json,sys,re; d=json.load(sys.stdin); desc=d.get("desc",""); m=re.search(r"tr\(([0-9a-fA-F]+)", desc); print(m.group(1) if m else "")')
+INTERNAL_KEY=$(echo "$ADDR_INFO" | python3 -c 'import json,sys,re; d=json.load(sys.stdin); pk=(d.get("pubkey") or "").strip(); desc=(d.get("desc") or "").strip(); m=re.search(r"tr\(([0-9a-fA-F]{64})", desc); cand=(pk if re.fullmatch(r"[0-9a-fA-F]{64}", pk) else (m.group(1) if m else "")); print(cand)')
 check_cmd "Extracting key from descriptor"
 INTERNAL_KEY=$(trim "$INTERNAL_KEY")
 
@@ -189,7 +189,9 @@ echo "Simple descriptor: $SIMPLE_DESCRIPTOR"
 
 # STUDENT TASK: Get a proper descriptor with checksum
 # WRITE YOUR SOLUTION BELOW:
-TAPROOT_DESCRIPTOR=$(bitcoin-cli -regtest getdescriptorinfo "$SIMPLE_DESCRIPTOR" | python3 -c 'import json,sys; print(json.load(sys.stdin)["descriptor"])')
+DESCRIPTOR_INFO=$(bitcoin-cli -regtest getdescriptorinfo "$SIMPLE_DESCRIPTOR")
+check_cmd "Descriptor info"
+TAPROOT_DESCRIPTOR=$(echo "$DESCRIPTOR_INFO" | python3 -c 'import json,sys; print(json.load(sys.stdin)["descriptor"])')
 check_cmd "Descriptor generation"
 TAPROOT_DESCRIPTOR=$(trim "$TAPROOT_DESCRIPTOR")
 echo "Taproot treasure map: $TAPROOT_DESCRIPTOR"
