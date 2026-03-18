@@ -177,7 +177,14 @@ check_cmd "Getting address info"
 
 # STUDENT TASK: Extract the internal key (the x-only pubkey) from the descriptor
 # WRITE YOUR SOLUTION BELOW:
-INTERNAL_KEY=$(echo "$ADDR_INFO" | python3 -c 'import json,sys,re; d=json.load(sys.stdin); pk=(d.get("pubkey") or "").strip(); desc=(d.get("desc") or "").strip(); m=re.search(r"tr\(([0-9a-fA-F]{64})", desc); cand=(pk if re.fullmatch(r"[0-9a-fA-F]{64}", pk) else (m.group(1) if m else "")); print(cand)')
+DESC=$(echo "$ADDR_INFO" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("desc",""))')
+INTERNAL_KEY=$(echo "$ADDR_INFO" | python3 -c 'import json,sys,re; d=json.load(sys.stdin); pk=(d.get("pubkey") or "").strip(); desc=(d.get("desc") or "").strip(); \
+pk66 = pk if re.fullmatch(r"(02|03)[0-9a-fA-F]{64}", pk) else ""; \
+if pk66: \
+  print(pk66[2:]); \
+  raise SystemExit; \
+m = re.search(r"tr\\([^#]*?([0-9a-fA-F]{64})", desc); \
+print(m.group(1) if m else "")')
 check_cmd "Extracting key from descriptor"
 INTERNAL_KEY=$(trim "$INTERNAL_KEY")
 
